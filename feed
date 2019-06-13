@@ -9,7 +9,9 @@ while source != ""
   end
   
   url = `(echo "BACK" && cat ~/.rss_reader/#{source}-urls) | dmenu -i -l 20 | cut -d "|" -f 2 | cut -d " " -f 2`.chomp
-  if url == "BACK"
+  if url == ""
+    break
+  elsif url == "BACK"
     system "exec ~/scripts/content/rss"
     break
   elsif url != ""
