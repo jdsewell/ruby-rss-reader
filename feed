@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+Encoding.default_external = Encoding::UTF_8
 require 'feedjira'
 source = `ls ~/.rss_reader | grep urls | cut -d "-" -f 1 | dmenu -p "Source: " -i -l 20`.chomp
 while source != ""
@@ -18,14 +19,18 @@ while source != ""
     feed = Feedjira::Feed.fetch_and_parse url
     entries = []
     feed.entries.each do |entry|
-      entries.push("#{entry.title.gsub(/"/, "'")} #{" " * 200} #{entry.url}")
+      entries.push(entry)
     end
-    entries = entries.join("\n")
+    entry_titles = []
+    entries.each do |entry|
+      entry_titles.push(entry.title.gsub(/"/, "'"))
+    end
 
-    selected = `echo "BACK\n#{entries}" | dmenu -i -l 30 | awk '{print $NF}'`.chomp
+    selected = `(echo "BACK" && echo "#{entry_titles.join("\n")}") | dmenu -i -l 30`.chomp
     
     if selected != "" && selected != "BACK"
-      system "#{application} #{selected}"
+      position = entry_titles.index(selected)
+      system "#{application} #{entries[position].url}"
     end
     unless selected == "BACK"
       break
