@@ -2,7 +2,7 @@
 Encoding.default_external = Encoding::UTF_8
 require 'feedjira'
 
-source = `ls ~/.rss_reader | grep urls | cut -d "-" -f 1 | fzf --color=bw --preview='cat ~/.rss_reader/{}-urls'`.chomp
+source = `ls ~/.rss_reader | grep urls | cut -d "-" -f 1 | fzf --color=bw --margin=10% --preview='cat ~/.rss_reader/{}-urls'`.chomp
 while source != ""
   if source == "youtube"
     application = "mpv"
@@ -10,7 +10,7 @@ while source != ""
     application = "surf"
   end
   
-  url = `(echo "BACK" && cat ~/.rss_reader/#{source}-urls) | fzf --color=bw | cut -d "|" -f 2 | cut -d " " -f 2`.chomp
+  url = `(echo "BACK" && cat ~/.rss_reader/#{source}-urls) | fzf --color=bw --margin=15% | cut -d "|" -f 2 | cut -d " " -f 2`.chomp
   if url == ""
     break
   elsif url == "BACK"
@@ -23,10 +23,10 @@ while source != ""
     entry_content = []
     feed.entries.each do |entry|
       entries.push(entry)
-      entry_titles.push(entry.title.gsub(/"/, "'"))
+      entry_titles.push(entry.title.gsub(/"/, "'").gsub(/\$/, "'$'"))
     end
     
-    selected = `(echo "BACK" && echo "#{entry_titles.join("\n")}") | fzf --color=bw`.chomp
+    selected = `(echo "BACK" && echo "#{entry_titles.join("\n")}") | fzf --color=bw --margin=20%`.chomp
     
     if selected != "" && selected != "BACK"
       position = entry_titles.index(selected)
