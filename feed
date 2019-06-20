@@ -2,11 +2,11 @@
 Encoding.default_external = Encoding::UTF_8
 require 'feedjira'
 
-source = `ls ~/.rss_reader/urls | grep -v system_application | fzf --color=bw --margin=10% --preview='cat ~/.rss_reader/urls/{} | grep -v system_application'`.chomp
+source = `ls ~/.config/rss_reader/urls | fzf --color=bw --margin=10% --preview='cat ~/.config/rss_reader/urls/{} | grep -v system_application'`.chomp
 while source != ""
-  app = `cat ~/.rss_reader/urls/#{source} | grep system_application | cut -d "=" -f 2`.chomp
+  app = `cat ~/.config/rss_reader/urls/#{source} | grep system_application | cut -d "=" -f 2`.chomp
   
-  url = `(echo "BACK" && cat ~/.rss_reader/urls/#{source}) | grep -v system_application | fzf --color=bw --margin=15% | cut -d "|" -f 2 | cut -d " " -f 2`.chomp
+  url = `(echo "BACK" && cat ~/.config/rss_reader/urls/#{source}) | grep -v system_application | fzf --color=bw --margin=15% | cut -d "|" -f 2 | cut -d " " -f 2`.chomp
   if url == ""
     break
   elsif url == "BACK"
