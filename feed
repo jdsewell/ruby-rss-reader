@@ -1,35 +1,39 @@
 #!/usr/bin/env ruby
 Encoding.default_external = Encoding::UTF_8
 require 'feedjira'
-
-source = `ls ~/.config/rss_reader/urls | fzf --color=bw --margin=10% --preview='cat ~/.config/rss_reader/urls/{} | grep -v system_application'`.chomp
-while source != ""
-  app = `cat ~/.config/rss_reader/urls/#{source} | grep system_application | cut -d "=" -f 2`.chomp
+while true
+  source = `ls ~/.config/rss_reader/urls | fzf --color=bw --margin=10% --preview='cat ~/.config/rss_reader/urls/{} | grep -v system_application'`.chomp
+  while source != ""
+    app = `cat ~/.config/rss_reader/urls/#{source} | grep system_application | cut -d "=" -f 2`.chomp
   
-  url = `(echo "BACK" && cat ~/.config/rss_reader/urls/#{source}) | grep -v system_application | fzf --color=bw --margin=15% | cut -d "|" -f 2 | cut -d " " -f 2`.chomp
-  if url == ""
-    break
-  elsif url == "BACK"
-    system "exec ~/.rss_reader/feed"
-    break
-  elsif url != ""
-    feed = Feedjira::Feed.fetch_and_parse url
-    entries = []
-    entry_titles = []
-    entry_content = []
-    feed.entries.each do |entry|
-      entries.push(entry)
-      entry_titles.push(entry.title.gsub(/"/, "'").gsub(/\$/, "'$'"))
-    end
-    
-    selected = `(echo "BACK" && echo "#{entry_titles.join("\n")}") | fzf --color=bw --margin=20%`.chomp
-    
-    if selected != "" && selected != "BACK"
-      position = entry_titles.index(selected)
-      system "#{app} #{entries[position].url}"
-    end
-    unless selected == "BACK"
+    url = `(echo "BACK" && cat ~/.config/rss_reader/urls/#{source}) | grep -v system_application | fzf --color=bw --margin=15% | cut -d "|" -f 2 | cut -d " " -f 2`.chomp
+    if url == ""
       break
+    elsif url == "BACK"
+      #system "exec ~/.rss_reader/feed"
+      break
+    elsif url != ""
+      feed = Feedjira::Feed.fetch_and_parse url
+      entries = []
+      entry_titles = []
+      entry_content = []
+      feed.entries.each do |entry|
+        entries.push(entry)
+        entry_titles.push(entry.title.gsub(/"/, "'").gsub(/\$/, "'$'"))
+      end
+    
+      selected = `(echo "BACK" && echo "#{entry_titles.join("\n")}") | fzf --color=bw --margin=20%`.chomp
+    
+      if selected != "" && selected != "BACK"
+        position = entry_titles.index(selected)
+        system "#{app} #{entries[position].url}"
+      end
+      unless selected == "BACK"
+        break
+      end
     end
+  end
+  if source == "" || selected != "BACK"
+    break
   end
 end
