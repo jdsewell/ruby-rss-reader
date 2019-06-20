@@ -26,14 +26,14 @@ while true
     
       if selected != "" && selected != "BACK"
         position = entry_titles.index(selected)
-        system "#{app} #{entries[position].url}"
+        system "#{app} #{entries[position].url} &"
       end
       unless selected == "BACK"
         break
       end
     end
   end
-  if source == "" || selected != "BACK"
+  if source == "" || url == "" || selected != "BACK"
     break
   end
 end
