@@ -1,4 +1,5 @@
-## This is meant to be a very simple terminal-based rss reader. It is written in Ruby and reads urls from ~/.config/rss_reader/urls.
+## Simple, terminal-based rss reader. Written in Ruby.
+* Reads urls from ~/.config/rss_reader/urls.
 
 ## Requirements: 
 
