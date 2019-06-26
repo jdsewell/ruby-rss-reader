@@ -1,39 +1,31 @@
 #!/usr/bin/env ruby
 Encoding.default_external = Encoding::UTF_8
 require 'feedjira'
-url_path = `cat ~/.config/rss_reader/config | grep ^path_to_urls | cut -d "=" -f 2`.chomp
+urls = `cat ~/.config/rss_reader/urls | grep -v ^# | grep -v ^system`.split("\n")
+feeds = []
+feed_titles = []
+urls.each do |x|
+  feed = Feedjira::Feed.fetch_and_parse x
+  feeds.push(feed)
+  feed_titles.push(feed.title)
+end
 while true
-  source = `ls #{url_path} | fzf --color=bw --margin=15% --preview="cat #{url_path}/{} | grep -v system_application"`.chomp
-  while source != ""
-    app = `cat #{url_path}/#{source} | grep system_application | cut -d "=" -f 2`.chomp
-  
-    url = `(echo "BACK" && cat #{url_path}/#{source}) | grep -v system_application | fzf --color=bw --margin=10% | cut -d "|" -f 2 | cut -d " " -f 2`.chomp
-    if url == ""
-      break
-    elsif url == "BACK"
-      break
-    elsif url != ""
-      feed = Feedjira::Feed.fetch_and_parse url
-      entries = []
-      entry_titles = []
-      entry_content = []
-      feed.entries.each do |entry|
-        entries.push(entry)
-        entry_titles.push(entry.title.gsub(/"/, "'").gsub(/\$/, "'$'"))
-      end
-    
-      selected = `(echo "BACK" && echo "#{entry_titles.join("\n")}") | fzf --color=bw --margin=5%`.chomp
-    
-      if selected != "" && selected != "BACK"
-        position = entry_titles.index(selected)
-        system "#{app} #{entries[position].url}"
-      end
-      unless selected == "BACK"
-        break
-      end
+  selected_feed = `echo "#{feed_titles.join("\n")}" | fzf --color=16`.chomp
+  if selected_feed != ""
+    selected_feed_position = feed_titles.index(selected_feed)
+    selected_feed_titles = []
+    feeds[selected_feed_position].entries.each do |x|
+      selected_feed_titles.push(x.title)
+    end
+    selected_entry = `(echo "BACK" && echo "#{selected_feed_titles.join("\n")}") | fzf --color=16`.chomp
+    if selected_entry != "" && selected_entry != "BACK"
+      selected_entry_position = selected_feed_titles.index(selected_entry)
+      url = feeds[selected_feed_position].entries[selected_entry_position].url
+      app = `cat ~/.config/rss_reader/applications | fzf --color=16`.chomp
+      system "#{app} #{url} &"
     end
   end
-  if source == "" || url == "" || selected != "BACK"
+  if selected_feed == "" || selected_entry == ""
     break
   end
 end
